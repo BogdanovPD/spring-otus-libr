@@ -16,6 +16,7 @@ import static ru.otus.spring.libr.util.DaoUtil.getNamedEntityMap;
 @RequiredArgsConstructor
 public class AuthorsDaoJdbc implements AuthorsDao {
 
+    public static final AuthorMapper AUTHOR_MAPPER = new AuthorMapper();
     private final NamedParameterJdbcOperations jdbc;
 
     @Override
@@ -30,7 +31,7 @@ public class AuthorsDaoJdbc implements AuthorsDao {
         parameters.put("name", name);
         try {
             return Optional.ofNullable(jdbc.queryForObject(
-                    "select * from authors where name = :name", parameters, new AuthorMapper()));
+                    "select * from authors where name = :name", parameters, AUTHOR_MAPPER));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -59,6 +60,6 @@ public class AuthorsDaoJdbc implements AuthorsDao {
 
     @Override
     public void deleteAllAuthors() {
-        jdbc.update("delete from genres", new HashMap<>());
+        jdbc.update("delete from authors", new HashMap<>());
     }
 }

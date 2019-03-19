@@ -16,6 +16,7 @@ import static ru.otus.spring.libr.util.DaoUtil.getNamedEntityMap;
 @RequiredArgsConstructor
 public class GenresDaoJdbc implements GenresDao {
 
+    public static final GenreMapper GENRE_MAPPER = new GenreMapper();
     private final NamedParameterJdbcOperations jdbc;
 
     @Override
@@ -30,7 +31,7 @@ public class GenresDaoJdbc implements GenresDao {
         parameters.put("name", name);
         try {
             return Optional.ofNullable(jdbc.queryForObject(
-                    "select * from genres where name = :name", parameters, new GenreMapper()));
+                    "select * from genres where name = :name", parameters, GENRE_MAPPER));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -51,7 +52,7 @@ public class GenresDaoJdbc implements GenresDao {
     @Override
     public List<Genre> getAllGenres() {
         try {
-            return jdbc.query("select * from authors", new GenreMapper());
+            return jdbc.query("select * from genres", new GenreMapper());
         } catch (EmptyResultDataAccessException e) {
             return Collections.emptyList();
         }
