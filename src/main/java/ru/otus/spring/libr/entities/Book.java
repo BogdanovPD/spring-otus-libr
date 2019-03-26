@@ -1,22 +1,34 @@
 package ru.otus.spring.libr.entities;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 
-@EqualsAndHashCode(callSuper = true)
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
-public class Book extends NamedEntity {
+@Setter
+@EqualsAndHashCode(exclude = {"id", "comments"})
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "books")
+public class Book {
 
-    private Author author;
-    private Genre genre;
+    @Id
+    @GeneratedValue
+    protected long id;
+    protected String name;
 
-    @Builder
-    public Book(long id, String name, Author author, Genre genre) {
-        super(id, name);
-        this.author = author;
-        this.genre = genre;
-    }
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    protected Author author;
+    @ManyToOne
+    @JoinColumn(name = "genre_id")
+    protected Genre genre;
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<Comment> comments = new ArrayList<>();
 
     @Override
     public String toString() {

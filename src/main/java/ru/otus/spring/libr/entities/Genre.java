@@ -1,12 +1,30 @@
 package ru.otus.spring.libr.entities;
 
-import lombok.Builder;
+import lombok.*;
 
-public class Genre extends NamedEntity {
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-    @Builder
-    public Genre(long id, String name) {
-        super(id, name);
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = "id")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "genres")
+public class Genre {
+
+    @Id
+    @GeneratedValue
+    protected long id;
+    protected String name;
+
+    @Override
+    public String toString() {
+        return name;
     }
 
 }
