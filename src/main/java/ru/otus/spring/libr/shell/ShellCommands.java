@@ -7,6 +7,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import ru.otus.spring.libr.entities.Author;
 import ru.otus.spring.libr.entities.Book;
+import ru.otus.spring.libr.entities.Comment;
 import ru.otus.spring.libr.entities.Genre;
 import ru.otus.spring.libr.services.LibrDaoService;
 
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ShellComponent
 @RequiredArgsConstructor
@@ -29,23 +31,30 @@ public class ShellCommands {
             @ShellOption(value = "-a", help = "Book's Author Name") @Size(max = 255) String author,
             @ShellOption(value = "-n", help = "Book's Name") @Size(max = 255) String name,
             @ShellOption(value = "-g", help = "Book's Genre Name") @Size(max = 255) String genre) {
-        Optional<Author> authorOptional = librDaoService.saveAuthor(author);
+        librDaoService.newAuthor(author);
+        Optional<Author> authorOptional = librDaoService.getAuthorByName(author);
         if (authorOptional.isEmpty()) {
-            return "Error! Author cannot be received or saved!";
+            log.error("Error! Author cannot be received or saved!");
+            return "";
         }
-        Optional<Genre> genreOptional = librDaoService.saveGenre(genre);
+        librDaoService.newGenre(genre);
+        Optional<Genre> genreOptional = librDaoService.getGenreByName(genre);
         if (genreOptional.isEmpty()) {
-            return "Error! Genre cannot be received or saved!";
+            log.error("Error! Genre cannot be received or saved!");
+            return "";
         }
         Optional<Book> bookOptional = librDaoService.getBookByName(name);
         if (bookOptional.isPresent()) {
-            return "Error! Book is already present. Input a different name";
+            log.error("Error! Book is already present. Input a different name");
+            return "";
         }
-        Optional<Book> optionalBook = librDaoService.saveBook(name, authorOptional.get(), genreOptional.get());
-        if (optionalBook.isEmpty()) {
-            return "Error! Book hasn't been saved!";
+        librDaoService.newBook(name, authorOptional.get(), genreOptional.get());
+        bookOptional = librDaoService.getBookByName(name);
+        if (bookOptional.isEmpty()) {
+            log.error("Error! Book hasn't been saved!");
+            return "";
         }
-        return optionalBook.get().toString();
+        return bookOptional.get().toString();
     }
 
     @ShellMethod("Select books")
@@ -104,6 +113,43 @@ public class ShellCommands {
             return Arrays.asList(genreOptional.get());
         }
         return librDaoService.getAllGenres();
+    }
+
+    @ShellMethod("Add new comment to book")
+    public String newComment(
+            @ShellOption(value = "-b", help = "Book's name") String bookName,
+            @ShellOption(value = "-c", help = "Comment") String comment
+    ) {
+        if (comment.isBlank()) {
+            log.error("Error! Comment is blank");
+            return "";
+        }
+        Optional<Book> bookOptional = librDaoService.getBookByName(bookName);
+        if (bookOptional.isEmpty()) {
+            log.error("Error! Book is not found");
+            return "";
+        }
+        Book book = bookOptional.get();
+        Comment commentEntity = Comment.builder()
+                .book(book)
+                .text(comment)
+                .build();
+        librDaoService.addComment(book, commentEntity);
+        return commentEntity.toString();
+    }
+
+    @ShellMethod("Select all comments by book")
+    public List<String> selectComments(
+            @ShellOption(value = "-b", help = "Book's name") String bookName
+    ) {
+        Optional<Book> bookOptional = librDaoService.getBookByName(bookName);
+        if (bookOptional.isEmpty()) {
+            log.error("Error! Book is not found");
+            return Collections.emptyList();
+        }
+        Book book = bookOptional.get();
+        return librDaoService.getCommentsByBook(book).stream()
+                .map(Comment::getText).collect(Collectors.toList());
     }
 
 }

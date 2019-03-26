@@ -1,27 +1,24 @@
 package ru.otus.spring.libr;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.ScriptShellApplicationRunner;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.otus.spring.libr.dao.AuthorsDao;
 import ru.otus.spring.libr.dao.BooksDao;
 import ru.otus.spring.libr.dao.GenresDao;
 import ru.otus.spring.libr.entities.Author;
 import ru.otus.spring.libr.entities.Book;
+import ru.otus.spring.libr.entities.Comment;
 import ru.otus.spring.libr.entities.Genre;
 import ru.otus.spring.libr.services.LibrDaoService;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -31,6 +28,7 @@ import static org.hamcrest.Matchers.*;
         InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
         ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false"
 })
+@ActiveProfiles("test")
 public class LibrApplicationTests {
 
     @Autowired
@@ -44,6 +42,7 @@ public class LibrApplicationTests {
 
     @After
     public void after() {
+        booksDao.deleteAllComments();
         booksDao.deleteAllBooks();
         authorsDao.deleteAllAuthors();
         genresDao.deleteAllGenres();
@@ -176,16 +175,35 @@ public class LibrApplicationTests {
         assertThat(books, containsInAnyOrder(book, book1));
     }
 
+    @Test
+    public void addCommentTest() {
+        String genreName = "Author Name";
+        Genre genre = createGenre(genreName);
+        String authorName = "Genre Name";
+        Author author = createAuthor(authorName);
+        String bookName = "Book Name";
+        Book book = createBook(author, genre, bookName);
+        Comment goodBook = Comment.builder()
+                .book(book)
+                .text("Good book")
+                .build();
+        librDaoService.addComment(book, goodBook);
+        assertThat(librDaoService.getCommentsByBook(book).get(0), is(goodBook));
+    }
+
     private Author createAuthor(String name) {
-        return librDaoService.saveAuthor(name).get();
+        librDaoService.newAuthor(name);
+        return librDaoService.getAuthorByName(name).get();
     }
 
     private Genre createGenre(String name) {
-        return librDaoService.saveGenre(name).get();
+        librDaoService.newGenre(name);
+        return librDaoService.getGenreByName(name).get();
     }
 
     private Book createBook(Author author, Genre genre, String name) {
-        return librDaoService.saveBook(name, author, genre).get();
+        librDaoService.newBook(name, author, genre);
+        return librDaoService.getBookByName(name).get();
     }
 
 }
