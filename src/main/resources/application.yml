@@ -5,4 +5,14 @@ spring:
     username: libr_usr
     password: libr
     initialization-mode: always
-
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+#    show-sql: true
+#    hibernate:
+  #      ddl-auto: create-drop
+logging:
+  level:
+    ROOT: error

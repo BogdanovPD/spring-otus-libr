@@ -1,13 +1,14 @@
 package ru.otus.spring.libr.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.spring.libr.dao.AuthorsDao;
 import ru.otus.spring.libr.dao.BooksDao;
 import ru.otus.spring.libr.dao.GenresDao;
 import ru.otus.spring.libr.entities.Author;
 import ru.otus.spring.libr.entities.Book;
+import ru.otus.spring.libr.entities.Comment;
 import ru.otus.spring.libr.entities.Genre;
 import ru.otus.spring.libr.services.LibrDaoService;
 
@@ -17,23 +18,26 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class LibrDaoServiceJdbc implements LibrDaoService {
+@Transactional
+public class LibrDaoServiceImpl implements LibrDaoService {
 
     private final AuthorsDao authorsDao;
     private final GenresDao genresDao;
     private final BooksDao booksDao;
 
     @Override
-    public Optional<Author> saveAuthor(String author) {
+    public void newAuthor(String author) {
         Optional<Author> authorByName = getAuthorByName(author);
         if (authorByName.isEmpty()) {
             authorsDao.saveAuthor(Author.builder()
                     .name(author)
                     .build());
-            Optional<Author> authorByNameFilled = authorsDao.getAuthorByName(author);
-            return authorByNameFilled;
         }
-        return authorByName;
+    }
+
+    @Override
+    public void saveAuthor(Author author) {
+        authorsDao.saveAuthor(author);
     }
 
     @Override
@@ -47,16 +51,18 @@ public class LibrDaoServiceJdbc implements LibrDaoService {
     }
 
     @Override
-    public Optional<Genre> saveGenre(String genre) {
+    public void newGenre(String genre) {
         Optional<Genre> genreByName = getGenreByName(genre);
         if (genreByName.isEmpty()) {
             genresDao.saveGenre(Genre.builder()
                     .name(genre)
                     .build());
-            Optional<Genre> genreByNameFilled = genresDao.getGenreByName(genre);
-            return genreByNameFilled;
         }
-        return genreByName;
+    }
+
+    @Override
+    public void saveGenre(Genre genre) {
+        genresDao.saveGenre(genre);
     }
 
     @Override
@@ -111,12 +117,27 @@ public class LibrDaoServiceJdbc implements LibrDaoService {
     }
 
     @Override
-    public Optional<Book> saveBook(String name, Author author, Genre genre) {
+    public void newBook(String name, Author author, Genre genre) {
         booksDao.saveBook(Book.builder()
                 .name(name)
                 .author(author)
                 .genre(genre)
                 .build());
-        return booksDao.getBookByName(name);
+    }
+
+    @Override
+    public void saveBook(Book book) {
+        booksDao.saveBook(book);
+    }
+
+    @Override
+    public void addComment(Book book, Comment comment) {
+        comment.setBook(book);
+        booksDao.loadComments(book).getComments().add(comment);
+    }
+
+    @Override
+    public List<Comment> getCommentsByBook(Book book) {
+        return booksDao.loadComments(book).getComments();
     }
 }
