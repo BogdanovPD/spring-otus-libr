@@ -1,21 +1,23 @@
 package ru.otus.spring.libr;
 
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.ScriptShellApplicationRunner;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import ru.otus.spring.libr.dao.AuthorsDao;
-import ru.otus.spring.libr.dao.BooksDao;
-import ru.otus.spring.libr.dao.GenresDao;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.otus.spring.libr.entities.Author;
 import ru.otus.spring.libr.entities.Book;
 import ru.otus.spring.libr.entities.Comment;
 import ru.otus.spring.libr.entities.Genre;
+import ru.otus.spring.libr.repository.AuthorRepository;
+import ru.otus.spring.libr.repository.BookRepository;
+import ru.otus.spring.libr.repository.CommentRepository;
+import ru.otus.spring.libr.repository.GenreRepository;
 import ru.otus.spring.libr.services.LibrDaoService;
 
 import java.util.List;
@@ -23,29 +25,32 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = {
         InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
         ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false"
 })
 @ActiveProfiles("test")
+@RequiredArgsConstructor
 public class LibrApplicationTests {
 
     @Autowired
     private LibrDaoService librDaoService;
     @Autowired
-    private AuthorsDao authorsDao;
+    private AuthorRepository authorRepository;
     @Autowired
-    private BooksDao booksDao;
+    private GenreRepository genreRepository;
     @Autowired
-    private GenresDao genresDao;
+    private BookRepository bookRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
-    @After
-    public void after() {
-        booksDao.deleteAllComments();
-        booksDao.deleteAllBooks();
-        authorsDao.deleteAllAuthors();
-        genresDao.deleteAllGenres();
+    @AfterEach
+    public void afterAll() {
+        commentRepository.deleteAll();
+        bookRepository.deleteAll();
+        authorRepository.deleteAll();
+        genreRepository.deleteAll();
     }
 
     @Test
@@ -192,17 +197,25 @@ public class LibrApplicationTests {
     }
 
     private Author createAuthor(String name) {
-        librDaoService.newAuthor(name);
+        librDaoService.saveAuthor(Author.builder()
+                .name(name)
+                .build());
         return librDaoService.getAuthorByName(name).get();
     }
 
     private Genre createGenre(String name) {
-        librDaoService.newGenre(name);
+        librDaoService.saveGenre(Genre.builder()
+                .name(name)
+                .build());
         return librDaoService.getGenreByName(name).get();
     }
 
     private Book createBook(Author author, Genre genre, String name) {
-        librDaoService.newBook(name, author, genre);
+        librDaoService.saveBook(Book.builder()
+                .author(author)
+                .genre(genre)
+                .name(name)
+                .build());
         return librDaoService.getBookByName(name).get();
     }
 

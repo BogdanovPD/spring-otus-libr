@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/libr
+    url: jdbc:postgresql://localhost:8432/libr
     username: libr_usr
     password: libr
     initialization-mode: always
