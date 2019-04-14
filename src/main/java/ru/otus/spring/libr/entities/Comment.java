@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class Comment {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected long id;
     @ManyToOne
     @JoinColumn(name = "book_id")

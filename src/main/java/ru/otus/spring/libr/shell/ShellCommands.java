@@ -31,24 +31,38 @@ public class ShellCommands {
             @ShellOption(value = "-a", help = "Book's Author Name") @Size(max = 255) String author,
             @ShellOption(value = "-n", help = "Book's Name") @Size(max = 255) String name,
             @ShellOption(value = "-g", help = "Book's Genre Name") @Size(max = 255) String genre) {
-        librDaoService.newAuthor(author);
         Optional<Author> authorOptional = librDaoService.getAuthorByName(author);
         if (authorOptional.isEmpty()) {
-            log.error("Error! Author cannot be received or saved!");
-            return "";
+            librDaoService.saveAuthor(Author.builder()
+                    .name(author)
+                    .build());
+            authorOptional = librDaoService.getAuthorByName(author);
+            if (authorOptional.isEmpty()) {
+                log.error("Error! Author cannot be received or saved!");
+                return "";
+            }
         }
-        librDaoService.newGenre(genre);
         Optional<Genre> genreOptional = librDaoService.getGenreByName(genre);
         if (genreOptional.isEmpty()) {
-            log.error("Error! Genre cannot be received or saved!");
-            return "";
+            librDaoService.saveGenre(Genre.builder()
+                    .name(genre)
+                    .build());
+            genreOptional = librDaoService.getGenreByName(name);
+            if (genreOptional.isEmpty()) {
+                log.error("Error! Genre cannot be received or saved!");
+                return "";
+            }
         }
         Optional<Book> bookOptional = librDaoService.getBookByName(name);
         if (bookOptional.isPresent()) {
             log.error("Error! Book is already present. Input a different name");
             return "";
         }
-        librDaoService.newBook(name, authorOptional.get(), genreOptional.get());
+        librDaoService.saveBook(Book.builder()
+                .author(authorOptional.get())
+                .genre(genreOptional.get())
+                .name(name)
+                .build());
         bookOptional = librDaoService.getBookByName(name);
         if (bookOptional.isEmpty()) {
             log.error("Error! Book hasn't been saved!");
