@@ -1,40 +1,28 @@
 package ru.otus.spring.libr.entities;
 
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
-@EqualsAndHashCode(exclude = {"id", "comments"})
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "books")
+@EqualsAndHashCode(exclude = {"id", "comments"})
+@ToString(exclude = {"id", "comments"})
+@Builder
+@Document(collection = "libr")
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected long id;
-    protected String name;
+    private String  id;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    protected Author author;
-    @ManyToOne
-    @JoinColumn(name = "genre_id")
-    protected Genre genre;
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    protected List<Comment> comments = new ArrayList<>();
+    private String author;
+    private String genre;
+    private String name;
 
-    @Override
-    public String toString() {
-        return "Book{" +
-                "author=" + author +
-                ", genre=" + genre +
-                ", name=" + name + '}';
-    }
+    private List<String> comments = new ArrayList<>();
+
 }

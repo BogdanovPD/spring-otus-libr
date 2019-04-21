@@ -5,17 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import ru.otus.spring.libr.entities.Author;
-import ru.otus.spring.libr.entities.Book;
-import ru.otus.spring.libr.entities.Comment;
-import ru.otus.spring.libr.entities.Genre;
-import ru.otus.spring.libr.services.LibrDaoService;
+import ru.otus.spring.libr.entities.*;
+import ru.otus.spring.libr.services.LibrService;
 
 import javax.validation.constraints.Size;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ShellComponent
@@ -23,7 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ShellCommands {
 
-    private final LibrDaoService librDaoService;
+    private final LibrService librService;
     private final String all = "all";
 
     @ShellMethod("Create new book")
@@ -31,44 +28,12 @@ public class ShellCommands {
             @ShellOption(value = "-a", help = "Book's Author Name") @Size(max = 255) String author,
             @ShellOption(value = "-n", help = "Book's Name") @Size(max = 255) String name,
             @ShellOption(value = "-g", help = "Book's Genre Name") @Size(max = 255) String genre) {
-        Optional<Author> authorOptional = librDaoService.getAuthorByName(author);
-        if (authorOptional.isEmpty()) {
-            librDaoService.saveAuthor(Author.builder()
-                    .name(author)
-                    .build());
-            authorOptional = librDaoService.getAuthorByName(author);
-            if (authorOptional.isEmpty()) {
-                log.error("Error! Author cannot be received or saved!");
-                return "";
-            }
-        }
-        Optional<Genre> genreOptional = librDaoService.getGenreByName(genre);
-        if (genreOptional.isEmpty()) {
-            librDaoService.saveGenre(Genre.builder()
-                    .name(genre)
-                    .build());
-            genreOptional = librDaoService.getGenreByName(name);
-            if (genreOptional.isEmpty()) {
-                log.error("Error! Genre cannot be received or saved!");
-                return "";
-            }
-        }
-        Optional<Book> bookOptional = librDaoService.getBookByName(name);
-        if (bookOptional.isPresent()) {
-            log.error("Error! Book is already present. Input a different name");
+        Optional<Book> book = librService.newBook(name, genre, author);
+        if (book.isEmpty()) {
+            log.error("Book hasn't been saved");
             return "";
         }
-        librDaoService.saveBook(Book.builder()
-                .author(authorOptional.get())
-                .genre(genreOptional.get())
-                .name(name)
-                .build());
-        bookOptional = librDaoService.getBookByName(name);
-        if (bookOptional.isEmpty()) {
-            log.error("Error! Book hasn't been saved!");
-            return "";
-        }
-        return bookOptional.get().toString();
+        return book.get().toString();
     }
 
     @ShellMethod("Select books")
@@ -80,90 +45,76 @@ public class ShellCommands {
             @ShellOption(value = "-g", help = "Genre to filter by", defaultValue = "all")
             @Size(max = 255) String genre
     ) {
-        if (!all.equals(name)) {
-            Optional<Book> bookOptional = librDaoService.getBookByName(name);
-            if (bookOptional.isEmpty()) {
-                return Collections.emptyList();
+        if (all.equals(name) && all.equals(author) && all.equals(genre)) {
+            return librService.getAllBooks();
+        }
+        if (all.equals(genre)) {
+            if (all.equals(author)) {
+                return librService.getBooksByName(name);
             }
-            return Arrays.asList(bookOptional.get());
+            if (all.equals(name)) {
+                return librService.getBooksByAuthor(author);
+            }
+            return librService.getBooksByNameAndAuthor(name, author);
         }
-        if (!all.equals(author) && !all.equals(genre)) {
-            return librDaoService.getBooksByAuthorAndGenre(author, genre);
+        if (all.equals(author)) {
+            if (all.equals(name)) {
+                return librService.getBooksByGenre(genre);
+            }
+            return librService.getBooksByNameAndGenre(name, genre);
         }
-        if (!all.equals(author)) {
-            return librDaoService.getBooksByAuthor(author);
+        if (all.equals(name)) {
+            return librService.getBooksByAuthorAndGenre(author, genre);
         }
-        if (!all.equals(genre)) {
-            return librDaoService.getBooksByGenre(genre);
-        }
-        return librDaoService.getAllBooks();
+        return librService.getBooksByNameAndAuthorAndGenre(name, author, genre);
     }
 
     @ShellMethod("Select authors")
-    public List<Author> selectAuthors(
-            @ShellOption(value = "-n", help = "Author to filter by", defaultValue = "all")
-            @Size(max = 255) String author
-    ) {
-        if (!all.equals(author)) {
-            Optional<Author> authorOptional = librDaoService.getAuthorByName(author);
-            if (authorOptional.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return Arrays.asList(authorOptional.get());
-        }
-        return librDaoService.getAllAuthors();
+    public Set<String> selectAuthors() {
+        return librService.getAllBooks().stream()
+                .map(Book::getAuthor)
+                .collect(Collectors.toSet());
     }
 
-    @ShellMethod("Select genres")
-    public List<Genre> selectGenres(
-            @ShellOption(value = "-n", help = "Genre to filter by", defaultValue = "all")
-            @Size(max = 255) String genre
-    ) {
-        if (!all.equals(genre)) {
-            Optional<Genre> genreOptional = librDaoService.getGenreByName(genre);
-            if (genreOptional.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return Arrays.asList(genreOptional.get());
-        }
-        return librDaoService.getAllGenres();
+    @ShellMethod("Select authors")
+    public Set<String> selectGenres() {
+        return librService.getAllBooks().stream()
+                .map(Book::getGenre)
+                .collect(Collectors.toSet());
     }
 
-    @ShellMethod("Add new comment to book")
+    @ShellMethod("Add new comment to the book")
     public String newComment(
-            @ShellOption(value = "-b", help = "Book's name") String bookName,
+            @ShellOption(value = "-n", help = "Book's name") String name,
+            @ShellOption(value = "-a", help = "Author") String author,
             @ShellOption(value = "-c", help = "Comment") String comment
     ) {
         if (comment.isBlank()) {
             log.error("Error! Comment is blank");
             return "";
         }
-        Optional<Book> bookOptional = librDaoService.getBookByName(bookName);
-        if (bookOptional.isEmpty()) {
-            log.error("Error! Book is not found");
+        List<Book> books = librService.getBooksByNameAndAuthor(name, author);
+        if (books.isEmpty()) {
+            log.error("There is no books with provided name/author");
             return "";
         }
-        Book book = bookOptional.get();
-        Comment commentEntity = Comment.builder()
-                .book(book)
-                .text(comment)
-                .build();
-        librDaoService.addComment(book, commentEntity);
-        return commentEntity.toString();
+        Book book = books.get(0);
+        book.getComments().add(comment);
+        librService.saveBook(book);
+        return "Added!";
     }
 
     @ShellMethod("Select all comments by book")
     public List<String> selectComments(
-            @ShellOption(value = "-b", help = "Book's name") String bookName
+            @ShellOption(value = "-n", help = "Book's name") String name,
+            @ShellOption(value = "-a", help = "Author") String author
     ) {
-        Optional<Book> bookOptional = librDaoService.getBookByName(bookName);
-        if (bookOptional.isEmpty()) {
-            log.error("Error! Book is not found");
+        List<Book> books = librService.getBooksByNameAndAuthor(name, author);
+        if (books.isEmpty()) {
+            log.error("There is no books with provided name/author");
             return Collections.emptyList();
         }
-        Book book = bookOptional.get();
-        return librDaoService.getCommentsByBook(book).stream()
-                .map(Comment::getText).collect(Collectors.toList());
+        return books.get(0).getComments();
     }
 
 }
