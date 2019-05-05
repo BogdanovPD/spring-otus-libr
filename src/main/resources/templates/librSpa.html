@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body style="background: #f2f2f2">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8" style="margin-top: 20px">
+            <table class="table table-striped table-bordered table-hover table-condensed">
+                <thead>
+                <tr>
+                    <th scope="col">Author</th>
+                    <th scope="col">Book</th>
+                    <th scope="col">Genre</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody id="booksTable">
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-2">
+            <button id="newBook" style="margin: 15px 5px 5px;" class="btn btn-primary" type="button">New Book</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4" id="mainForm">
+
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+<script>
+    addBook = function (book) {
+        $('#booksTable').append(`
+                <tr>
+                    <td class="author">${book.author}</td>
+                    <td class="bookName">${book.name}</td>
+                    <td class="genre">${book.genre}</td>
+                    <td style="text-align: center">
+                    <button id="addComment" class="btn btn-secondary" type="button">Add Comment</button>
+                    <button id="showComments" class="btn btn-secondary" type="button">Show Comments</button>
+                    </td>
+                </tr>
+            `)
+    };
+    select = function () {
+        $.get('/api/getBooks').done(function (books) {
+            $('#booksTable tr').remove();
+            books.forEach(addBook);
+        });
+    };
+    newBookForm = function() {
+        $('#mainForm div').remove();
+        $('#mainForm').append(`<div class="jumbotron" style="background: transparent !important">
+            <div class="form-group" style="margin: 5px">
+            <label>Author: </label>
+        <input class="form-control" type="text" id="author"/>
+            </div>
+            <div class="form-group" style="margin: 5px">
+            <label>Book: </label>
+        <input class="form-control" type="text" id="name"/>
+            </div>
+            <div class="form-group" style="margin: 5px">
+            <label>Genre: </label>
+        <input class="form-control" type="text" id="genre"/>
+            </div>
+            <button id="save" style="margin: 15px 5px 5px;" class="btn btn-primary" type="button">Submit</button>
+            </div>`);
+    };
+    $(document).on('click', '#save', function () {
+        $.ajax({
+            type: 'POST',
+            url: 'api/saveBook',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                "author": $('#author').val(),
+                "name": $('#name').val(),
+                "genre": $('#genre').val()
+            }),
+            success: addBook
+        })
+    });
+    $(document).on('click', '#showComments', function () {
+        let tr = $(this).closest("tr");
+        let author = tr.find(".author").text();
+        let name = tr.find(".bookName").text();
+        let data = {author: author, name: name};
+        $.get('/api/getComments', data).done(function (comments) {
+            $('#mainForm div').remove();
+            $('#mainForm').append(`<div class="col-md-4" style="margin-top: 20px">
+                <table class="table table-striped table-bordered table-hover table-condensed">
+                <thead>
+                <tr>
+                <th scope="col">Comment</th>
+                </tr>
+                </thead>
+                <tbody id="commentsTable">
+                </tbody>
+                </table>
+                </div>`);
+            comments.forEach(function (comment) {
+                $('#commentsTable').append(`
+                <tr>
+                    <td>${comment}</td>
+                </tr>
+                `)
+            })
+        })
+    });
+    $(document).on('click', '#addComment', function () {
+        let tr = $(this).closest("tr");
+        let author = tr.find(".author").text();
+        let name = tr.find(".bookName").text();
+        $('#mainForm div').remove();
+        $('#mainForm').append(`
+        <div class="jumbotron" style="background: transparent !important" id="commentForm">
+            <div class="form-group" style="margin: 5px">
+                <label>Comment: </label>
+                <input type="hidden" id="commentBookAuthor" value="${author}"/>
+                <input type="hidden" id="commentBookName" value="${name}"/>
+                <input class="form-control" type="text" id="comment"/>
+            </div>
+            <button id="saveComment" style="margin: 15px 5px 5px;" class="btn btn-primary" type="button">Submit</button>
+        </div>`);
+    });
+    $(document).on('click', '#saveComment', function () {
+        $.ajax({
+            type: 'POST',
+            url: 'api/addComment',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                "bookAuthor": $('#commentBookAuthor').val(),
+                "bookName": $('#commentBookName').val(),
+                "comment": $('#comment').val()
+            }),
+            success: function (msg) {
+                $('#commentForm').append(`<h3 id="msg" style="color: darkseagreen">${msg}</h3>`)
+                setTimeout(function() {
+                    $('#msg').remove();
+                }, 5000);
+            },
+            error: function (msg) {
+                $('#commentForm').append(`<h3 id="msg" style="color: darkred">${msg}</h3>`);
+                setTimeout(function() {
+                    $('#msg').remove();
+                }, 5000);
+            }
+        })
+    });
+    $('#newBook').click(newBookForm);
+    $(select);
+    $(newBookForm);
+</script>
+</body>
+</html>

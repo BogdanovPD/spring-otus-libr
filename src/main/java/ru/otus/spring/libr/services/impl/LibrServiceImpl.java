@@ -8,7 +8,6 @@ import ru.otus.spring.libr.repository.BookRepository;
 import ru.otus.spring.libr.services.LibrService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
