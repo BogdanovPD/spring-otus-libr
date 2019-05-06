@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import ru.otus.spring.libr.entities.*;
+import ru.otus.spring.libr.entities.Book;
 import ru.otus.spring.libr.services.LibrService;
 
 import javax.validation.constraints.Size;

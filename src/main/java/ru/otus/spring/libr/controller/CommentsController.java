@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 import ru.otus.spring.libr.dto.CommentDto;
 import ru.otus.spring.libr.entities.Book;
 import ru.otus.spring.libr.services.LibrService;
@@ -17,21 +14,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class LibrRestController {
+public class CommentsController {
 
     private final LibrService librService;
 
-    @PostMapping(value = "/api/saveBook", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Book> saveBook(@RequestBody Book book) {
-        return ResponseEntity.ok(librService.saveBook(book));
-    }
-
-    @GetMapping(value = "/api/getBooks")
-    public List<Book> getAllBooks() {
-        return librService.getAllBooks();
-    }
-
-    @GetMapping(value = "/api/getComments")
+    @GetMapping(value = "/api/comments")
     public List<String> getComments(@RequestParam String name, @RequestParam String author) {
         List<Book> books = librService.getBooksByNameAndAuthor(name, author);
         if (books.isEmpty()) {
@@ -40,7 +27,7 @@ public class LibrRestController {
         return books.get(0).getComments();
     }
 
-    @PostMapping(value = "/api/addComment", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/comments", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> addComments(@RequestBody CommentDto commentDto) {
         List<Book> books = librService.getBooksByNameAndAuthor(commentDto.getBookName(), commentDto.getBookAuthor());
         if (books.isEmpty()) {

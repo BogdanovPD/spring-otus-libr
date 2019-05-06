@@ -54,7 +54,7 @@
             `)
     };
     select = function () {
-        $.get('/api/getBooks').done(function (books) {
+        $.get('/api/books').done(function (books) {
             $('#booksTable tr').remove();
             books.forEach(addBook);
         });
@@ -80,7 +80,7 @@
     $(document).on('click', '#save', function () {
         $.ajax({
             type: 'POST',
-            url: 'api/saveBook',
+            url: 'api/books',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({
@@ -96,7 +96,7 @@
         let author = tr.find(".author").text();
         let name = tr.find(".bookName").text();
         let data = {author: author, name: name};
-        $.get('/api/getComments', data).done(function (comments) {
+        $.get('/api/comments', data).done(function (comments) {
             $('#mainForm div').remove();
             $('#mainForm').append(`<div class="col-md-4" style="margin-top: 20px">
                 <table class="table table-striped table-bordered table-hover table-condensed">
@@ -137,7 +137,7 @@
     $(document).on('click', '#saveComment', function () {
         $.ajax({
             type: 'POST',
-            url: 'api/addComment',
+            url: 'api/comments',
             contentType: 'application/json',
             data: JSON.stringify({
                 "bookAuthor": $('#commentBookAuthor').val(),
