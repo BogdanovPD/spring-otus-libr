@@ -2,6 +2,10 @@ spring:
   data:
     mongodb:
       port: 0
+  shell:
+    interactive:
+      enabled: false
+
 logging:
   level:
     ROOT: error
