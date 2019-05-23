@@ -1,7 +1,7 @@
 package ru.otus.spring.libr;
 
-import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,6 @@ import ru.otus.spring.libr.repository.BookRepository;
 import ru.otus.spring.libr.services.LibrService;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -32,9 +31,9 @@ public class LibrServiceTest {
     @Autowired
     private BookRepository bookRepository;
 
-    @After
-    public void afterEach() {
-        bookRepository.deleteAll();
+    @Before
+    public void before() {
+        bookRepository.deleteAll().block();
     }
 
     @Test
@@ -48,102 +47,88 @@ public class LibrServiceTest {
     @Test
     public void getAllBooksTest() {
         Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-        StepVerifier.create(newBook).consumeNextWith(b -> {
-            Flux<Book> books = librService.getAllBooks();
-            StepVerifier.create(books)
-                    .expectNext(b)
-                    .verifyComplete();// тут почему-то уходит в бесконечный цикл :(
-        })
+        Flux<Book> books = librService.getAllBooks();
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
                 .verifyComplete();
     }
 
-//    @Test
-//    public void getAllBooksByNameTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByName(BOOK).collectList().subscribe(books -> {
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void getAllBooksByAuthorTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByAuthor(AUTHOR).collectList().subscribe(books -> {
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void getAllBooksByGenreTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByGenre(GENRE).collectList().subscribe(books -> {
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void getAllBooksByNameAndAuthorTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByNameAndAuthor(BOOK, AUTHOR).collectList().subscribe(books -> {
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void getAllBooksByNameAndGenreTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByNameAndGenre(BOOK, GENRE).collectList().subscribe(books -> {
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void getAllBooksByAuthorAndGenreTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByAuthorAndGenre(AUTHOR, GENRE).collectList().subscribe(books -> {
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void getAllBooksByNameAndAuthorAndGenreTest() {
-//        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
-//        newBook.subscribe(book -> librService.getBooksByNameAndAuthorAndGenre(BOOK, AUTHOR, GENRE)
-//                .collectList().subscribe(books -> {
-//                    System.out.println(books.size());
-//            assertEquals(books.size(), 1);
-//            assertEquals(books.get(0), book);
-//        }));
-//    }
-//
-//    @Test
-//    public void saveBookTest(){
-//        librService.newBook(BOOK, GENRE, AUTHOR).subscribe(b -> {
-//            String author1 = AUTHOR.concat("1");
-//            b.setAuthor(author1);
-//            StepVerifier.create(librService.saveBook(b))
-//                    .assertNext(b1 -> assertEquals(b1.getAuthor(), author1))
-//                    .expectComplete()
-//                    .verify();
-//
-//        });
-//    }
+    @Test
+    public void getAllBooksByNameTest() {
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        Flux<Book> books = librService.getBooksByName(BOOK);
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
+                .verifyComplete();
+    }
 
-//    @Test
-//    public void addCommentTest(){
-//        Book book = librService.newBook(BOOK, GENRE, AUTHOR).get();
-//        String comment = "Comment";
-//        book.getComments().add(comment);
-//        librService.saveBook(book);
-//        Book book1 = librService.getAllBooks().get(0);
-//        String comment1 = book1.getComments().get(0);
-//        assertEquals(comment, comment1);
-//    }
+    @Test
+    public void getAllBooksByAuthorTest() {
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        Flux<Book> books = librService.getBooksByAuthor(AUTHOR);
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
+                .verifyComplete();
+    }
+
+    @Test
+    public void getAllBooksByGenreTest() {
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        Flux<Book> books = librService.getBooksByGenre(GENRE);
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
+                .verifyComplete();
+    }
+
+    @Test
+    public void getAllBooksByNameAndGenreTest() {
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        Flux<Book> books = librService.getBooksByNameAndGenre(BOOK, GENRE);
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
+                .verifyComplete();
+    }
+
+    @Test
+    public void getAllBooksByAuthorAndGenreTest() {
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        Flux<Book> books = librService.getBooksByAuthorAndGenre(AUTHOR, GENRE);
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
+                .verifyComplete();
+    }
+
+    @Test
+    public void getAllBooksByNameAndAuthorAndGenreTest() {
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        Flux<Book> books = librService.getBooksByNameAndAuthorAndGenre(BOOK, AUTHOR, GENRE);
+        StepVerifier.create(books)
+                .expectNext(newBook.block())
+                .verifyComplete();
+    }
+
+    @Test
+    public void saveBookTest(){
+        Mono<Book> newBook = librService.newBook(BOOK, GENRE, AUTHOR);
+        String author1 = AUTHOR.concat("1");
+        Book book = newBook.block();
+        book.setAuthor(author1);
+        Mono<Book> bookMono = librService.saveBook(book);
+        StepVerifier.create(bookMono)
+                .assertNext(b -> assertEquals(b.getAuthor(), author1))
+                .verifyComplete();
+    }
+
+    @Test
+    public void addCommentTest(){
+        Book book = librService.newBook(BOOK, GENRE, AUTHOR).block();
+        String comment = "Comment";
+        book.getComments().add(comment);
+        Mono<Book> bookMono = librService.saveBook(book);
+        StepVerifier.create(bookMono)
+                .assertNext(b -> assertEquals(b.getComments().get(0), comment))
+                .verifyComplete();
+
+    }
 
 }
