@@ -4,11 +4,6 @@ spring:
       host: localhost
       port: 27017
       database: libr
-  shell:
-    interactive:
-        enabled: false
-
-
 
 logging:
   level:
