@@ -48,9 +48,9 @@
     addBook = function (book) {
         $('#booksTable').append(`
                 <tr>
-                    <td class="author">${book.author}</td>
+                    <td class="author">${book.author.name}</td>
                     <td class="bookName">${book.name}</td>
-                    <td class="genre">${book.genre}</td>
+                    <td class="genre">${book.genre.name}</td>
                     <td style="text-align: center">
                     <button id="addComment" class="btn btn-secondary" type="button">Add Comment</button>
                     <button id="showComments" class="btn btn-secondary" type="button">Show Comments</button>
@@ -91,9 +91,9 @@
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({
-                "author": $('#author').val(),
+                "author": {"name": $('#author').val()},
                 "name": $('#name').val(),
-                "genre": $('#genre').val()
+                "genre": {"name": $('#genre').val()}
             }),
             success: addBook
         })

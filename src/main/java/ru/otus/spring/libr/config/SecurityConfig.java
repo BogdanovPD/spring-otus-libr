@@ -24,6 +24,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.requestMatchers()
                 .and()
                 .csrf().disable()
+                //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                //.and()
                 .httpBasic().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated()

@@ -7,10 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.spring.libr.dto.CommentDto;
 import ru.otus.spring.libr.entities.Book;
+import ru.otus.spring.libr.entities.Comment;
 import ru.otus.spring.libr.services.LibrService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class CommentsController {
         if (books.isEmpty()) {
             return Collections.emptyList();
         }
-        return books.get(0).getComments();
+        return books.get(0).getComments().stream().map(c -> c.getText()).collect(Collectors.toList());
     }
 
     @PostMapping(value = "/api/comments", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -34,7 +36,7 @@ public class CommentsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot found the book");
         }
         Book book = books.get(0);
-        book.getComments().add(commentDto.getComment());
+        book.getComments().add(Comment.builder().text(commentDto.getComment()).book(book).build());
         librService.saveBook(book);
         return ResponseEntity.ok("Comment successfully added!");
     }

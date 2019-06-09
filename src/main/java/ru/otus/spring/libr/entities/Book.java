@@ -1,28 +1,43 @@
 package ru.otus.spring.libr.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"id", "comments"})
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id", "comments"})
-@ToString(exclude = {"id", "comments"})
-@Builder
-@Document(collection = "libr")
+@Entity
+@Table(name = "books")
 public class Book {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected long id;
+    protected String name;
 
-    private String author;
-    private String genre;
-    private String name;
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "author_id")
+    protected Author author;
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "genre_id")
+    protected Genre genre;
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<Comment> comments = new ArrayList<>();
 
-    private List<String> comments = new ArrayList<>();
-
+    @Override
+    public String toString() {
+        return "Book{" +
+                "author=" + author +
+                ", genre=" + genre +
+                ", name=" + name + '}';
+    }
 }

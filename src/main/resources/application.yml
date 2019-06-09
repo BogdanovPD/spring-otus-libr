@@ -1,14 +1,17 @@
 spring:
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-      database: libr
-  shell:
-    interactive:
-        enabled: false
-
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/libr
+    username: libr_usr
+    password: libr
+    initialization-mode: always
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+#        ddl-auto: create-drop
+      show-sql: true
 logging:
   level:
     ROOT: info
-

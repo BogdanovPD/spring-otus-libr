@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: "db/changelog/changes/create-tables.yaml"
+  - include:
+      file: "db/changelog/changes/init-data.yaml"
+  - include:
+      file: "db/changelog/changes/sequences.yaml"
+  - include:
+      file: "db/changelog/changes/create-acl-tables.yaml"
+  - include:
+      file: "db/changelog/changes/init-acl-data.yaml"
