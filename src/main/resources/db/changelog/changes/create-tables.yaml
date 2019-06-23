@@ -62,9 +62,6 @@ databaseChangeLog:
                   constraints:
                     foreignKeyName: fk_book_genre
                     references: genres(id)
-        - addUniqueConstraint:
-            tableName: books
-            columnNames: name, author_id
         - createTable:
             tableName: comments
             columns:
@@ -87,7 +84,7 @@ databaseChangeLog:
                     foreignKeyName: fk_comment_book
                     references: books(id)
         - createTable:
-            tableName: users
+            tableName: clients
             columns:
               - column:
                   name: id
@@ -97,21 +94,7 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: email
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: password
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: enabled
-                  type: boolean
-              - column:
-                  name: role
+                  name: name
                   type: varchar(255)
                   constraints:
                     nullable: false
