@@ -98,3 +98,57 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+        - createTable:
+            tableName: book_client
+            columns:
+              - column:
+                  name: book_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: bigint
+              - column:
+                  name: date_time
+                  type: timestamp
+              - column:
+                  name: book_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: book_author
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: client_name
+                  type: varchar(255)
+        - createTable:
+            tableName: delayed_request
+            columns:
+              - column:
+                  name: requested_book
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+        - createTable:
+            tableName: delayed_request_clients
+            columns:
+              - column:
+                  name: requested_book
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_delayed_request
+                    references: delayed_request(requested_book)
+              - column:
+                  name: client
+                  type: varchar(255)
+        - addPrimaryKey:
+            columnNames: requested_book, client
+            constraintName: pk_delayed_request_clients
+            tableName: delayed_request_clients

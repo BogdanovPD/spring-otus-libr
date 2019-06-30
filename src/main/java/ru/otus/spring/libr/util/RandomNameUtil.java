@@ -1,4 +1,4 @@
-package ru.otus.spring.libr.randoms;
+package ru.otus.spring.libr.util;
 
 import java.util.List;
 import java.util.Random;

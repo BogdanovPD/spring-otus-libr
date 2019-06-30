@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.otus.spring.libr.clients.entity.Client;
 import ru.otus.spring.libr.clients.services.ClientEmissionService;
 import ru.otus.spring.libr.clients.services.ClientService;
-import ru.otus.spring.libr.randoms.RandomNameUtil;
+import ru.otus.spring.libr.util.RandomNameUtil;
 
 @Slf4j
 @Service

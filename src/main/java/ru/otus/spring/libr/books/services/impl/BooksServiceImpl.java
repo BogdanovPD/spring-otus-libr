@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class BooksServiceImpl implements BooksService {
 
     private final AuthorRepository authorRepository;
@@ -102,8 +102,13 @@ public class BooksServiceImpl implements BooksService {
     public Book saveBook(Book book) {
         Optional<Author> authorOpt = authorRepository.getAuthorByName(book.getAuthor().getName());
         authorOpt.ifPresent(a -> book.setAuthor(a));
-        Optional<Genre> genreOpt = genreRepository.getGenreByName(book.getGenre().getName());
-        genreOpt.ifPresent(g -> book.setGenre(g));
+        List<Book> books = bookRepository.findAllByNameAndAuthor_Name(book.getName(), book.getAuthor().getName());
+        if (!books.isEmpty()) {
+            book.setGenre(books.get(0).getGenre());
+        } else {
+            Optional<Genre> genreOpt = genreRepository.getGenreByName(book.getGenre().getName());
+            genreOpt.ifPresent(g -> book.setGenre(g));
+        }
         return bookRepository.save(book);
     }
 

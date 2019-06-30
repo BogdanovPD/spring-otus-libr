@@ -6,5 +6,6 @@ public interface ClientService {
 
     Client saveClient(Client client);
     long getClientsSize();
+    String getNameById(long id);
 
 }

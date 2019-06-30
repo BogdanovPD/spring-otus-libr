@@ -1,4 +1,4 @@
-package ru.otus.spring.libr.clients.dto;
+package ru.otus.spring.libr.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class BookRequest {
 
     private long clientId;
+    private String clientName;
     private String bookName;
+    private String author;
 
 }
