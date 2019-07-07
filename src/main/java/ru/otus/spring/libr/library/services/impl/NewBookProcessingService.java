@@ -7,8 +7,6 @@ import ru.otus.spring.libr.dto.BookDto;
 import ru.otus.spring.libr.library.entity.BookClient;
 import ru.otus.spring.libr.library.services.BookClientService;
 
-import java.time.LocalDateTime;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor

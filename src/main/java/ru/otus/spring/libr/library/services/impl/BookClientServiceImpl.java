@@ -1,5 +1,7 @@
 package ru.otus.spring.libr.library.services.impl;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,6 +12,7 @@ import ru.otus.spring.libr.library.repository.BookClientRepository;
 import ru.otus.spring.libr.library.services.BookClientService;
 import ru.otus.spring.libr.library.services.DelayedRequestService;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,9 +26,22 @@ public class BookClientServiceImpl implements BookClientService {
     private final BookClientRepository bookClientRepository;
     private final DelayedRequestService delayedRequestService;
 
+    private final MeterRegistry registry;
+    private Counter booksCount;
+    private Counter booksTaken;
+    private Counter booksReturned;
+
+    @PostConstruct
+    private void init() {
+        booksCount = registry.counter("books.count");
+        booksTaken = registry.counter("books.taken");
+        booksReturned = registry.counter("books.returned");
+    }
+
     @Override
     public BookClient save(BookClient bookClient) {
         bookClient = bookClientRepository.save(bookClient);
+        booksCount.increment();
         updateClientIfWaiting(bookClient);
         return bookClient;
     }
@@ -58,6 +74,7 @@ public class BookClientServiceImpl implements BookClientService {
         bookClient.setClientName(clientName);
         bookClient.setDateTime(LocalDateTime.now());
         bookClientRepository.save(bookClient);
+        booksTaken.increment();
         log.info("===================================================================================================");
         log.info("Client [id=" + clientId + ", name=" + clientName + "] has taken a book [id=" + bookClient.getBookId() +
                 ", name=" + bookClient.getBookName() + ", author=" + bookClient.getBookAuthor() + "]");
@@ -80,6 +97,7 @@ public class BookClientServiceImpl implements BookClientService {
         bookClient.setDateTime(null);
         bookClient.setClientName(null);
         log.info("===================================================================================================");
+        booksReturned.increment();
         updateClientIfWaiting(bookClient);
     }
 }

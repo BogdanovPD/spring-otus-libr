@@ -14,3 +14,14 @@ spring:
 logging:
   level:
     ROOT: info
+    org.springframework.boot.autoconfigure.logging: debug
+  file: logfile.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    logfile:
+      enabled: true
