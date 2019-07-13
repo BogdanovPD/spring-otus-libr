@@ -176,25 +176,25 @@ public class LibrServiceTests {
         assertThat(books.get(0).getAuthor(), is(author));
     }
 
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
-    public void getAllBooksTest() {
-        String genreName = "Author Name";
-        Genre genre = createGenre(genreName);
-        String authorName = "Genre Name";
-        Author author = createAuthor(authorName);
-        String bookName = "Book Name";
-        Book book = createBook(author, genre, bookName);
-        String genreName1 = "Author Name1";
-        Genre genre1 = createGenre(genreName1);
-        String authorName1 = "Genre Name1";
-        Author author1 = createAuthor(authorName1);
-        String bookName1 = "Book Name1";
-        Book book1 = createBook(author1, genre1, bookName1);
-        List<Book> books = librService.getAllBooks();
-        assertThat(books.size(), is(2));
-        assertThat(books, containsInAnyOrder(book, book1));
-    }
+//    @Test
+//    @WithMockUser(roles = {"ADMIN"})
+//    public void getAllBooksTest() {
+//        String genreName = "Author Name";
+//        Genre genre = createGenre(genreName);
+//        String authorName = "Genre Name";
+//        Author author = createAuthor(authorName);
+//        String bookName = "Book Name";
+//        Book book = createBook(author, genre, bookName);
+//        String genreName1 = "Author Name1";
+//        Genre genre1 = createGenre(genreName1);
+//        String authorName1 = "Genre Name1";
+//        Author author1 = createAuthor(authorName1);
+//        String bookName1 = "Book Name1";
+//        Book book1 = createBook(author1, genre1, bookName1);
+//        List<Book> books = librService.getAllBooks();
+//        assertThat(books.size(), is(2));
+//        assertThat(books, containsInAnyOrder(book, book1));
+//    }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})

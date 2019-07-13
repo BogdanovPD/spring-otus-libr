@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+  psql:
+    image: postgres:alpine
+    restart: always
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  libr:
+    build: .
+    depends_on:
+      - psql
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  psql_data:
+
