@@ -36,7 +36,6 @@ public class CommentsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot found the book");
         }
         Book book = books.get(0);
-//        book.getComments().add(Comment.builder().text(commentDto.getComment()).book(book).build());
         librService.addComment(book, Comment.builder().text(commentDto.getComment()).book(book).build());
         return ResponseEntity.ok("Comment successfully added!");
     }
