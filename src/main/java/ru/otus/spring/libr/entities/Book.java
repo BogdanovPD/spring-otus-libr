@@ -22,10 +22,10 @@ public class Book {
     protected long id;
     protected String name;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne
     @JoinColumn(name = "author_id")
     protected Author author;
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne
     @JoinColumn(name = "genre_id")
     protected Genre genre;
     @JsonIgnore

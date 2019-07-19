@@ -26,7 +26,7 @@ public class CommentsController {
         if (books.isEmpty()) {
             return Collections.emptyList();
         }
-        return books.get(0).getComments().stream().map(c -> c.getText()).collect(Collectors.toList());
+        return librService.getCommentsByBook(books.get(0)).stream().map(c -> c.getText()).collect(Collectors.toList());
     }
 
     @PostMapping(value = "/api/comments", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -36,8 +36,7 @@ public class CommentsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot found the book");
         }
         Book book = books.get(0);
-        book.getComments().add(Comment.builder().text(commentDto.getComment()).book(book).build());
-        librService.saveBook(book);
+        librService.addComment(book, Comment.builder().text(commentDto.getComment()).book(book).build());
         return ResponseEntity.ok("Comment successfully added!");
     }
 }
